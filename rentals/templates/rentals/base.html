@@ -19,7 +19,7 @@
 {% block content %}{% endblock %}
 <footer>
   <p>Enquiries: <a href="tel:{{ BUSINESS_PHONE }}">{{ BUSINESS_PHONE }}</a> ·
-  <a href="https://wa.me/{{ WHATSAPP_NUMBER }}">WhatsApp</a> · Pay via M-Pesa Send Money {{ MPESA_NUMBER }}</p>
+  <a href="{{ WHATSAPP_URL }}">WhatsApp</a> · Pay via M-Pesa Send Money {{ MPESA_NUMBER }}</p>
   <p class="copy">&copy; {% now 'Y' %} Car Rental KE. All rights reserved.</p>
 </footer>
 </body>
