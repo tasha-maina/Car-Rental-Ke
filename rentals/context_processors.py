@@ -2,8 +2,8 @@ from urllib.parse import quote
 
 from django.conf import settings
 
-WA_GREETING = ("Hello Car Rental KE! Thank you for choosing us. "
-               "I'd love to hear about your cars and rates. How can you assist me with my trip?")
+WA_GREETING = ("Hello Car Rental KE! I'm interested in hiring a car. "
+               "Could you help me with availability and rates?")
 
 
 def business(request):

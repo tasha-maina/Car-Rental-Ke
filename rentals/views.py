@@ -85,9 +85,9 @@ def pay(request, ref):
             b.save()
             messages.success(request, "Payment received. We will verify it and confirm shortly.")
             return redirect("pay", ref=b.ref)
-    wa = (f"Hello Car Rental KE! Thank you for choosing us. I'm {b.customer_name} and I booked "
-          f"the {b.car} ({b.ref}) for {b.start_date} to {b.end_date}. "
-          f"M-Pesa code: {b.mpesa_code or 'pending'}. How can you assist me further?")
+    wa = (f"Hello Car Rental KE! I'm {b.customer_name} and I booked the {b.car} ({b.ref}) "
+          f"for {b.start_date} to {b.end_date}. M-Pesa code: {b.mpesa_code or 'pending'}. "
+          f"Could you please confirm my booking?")
     return render(request, "rentals/pay.html", {"b": b, "wa_text": quote(wa)})
 
 
