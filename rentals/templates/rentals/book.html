@@ -1,0 +1,23 @@
+{% extends "rentals/base.html" %}
+{% block title %}Book {{ car.name }}{% endblock %}
+{% block content %}
+<main class="narrow">
+  <h2>{{ car.name }}</h2>
+  {% if car.photo %}<img class="hero-img" src="{{ car.photo.url }}" alt="{{ car.name }}">{% endif %}
+  <div class="panel">
+    <p>{{ start }} → {{ end }} ({{ q.days }} day{{ q.days|pluralize }})<br>
+    {% if q.with_driver %}With driver{% else %}Self-drive{% endif %} · KES {{ q.per_day|floatformat:"0g" }}/day</p>
+    <p class="price">Total: KES {{ q.total|floatformat:"0g" }}</p>
+    <p class="muted">Deposit to secure: KES {{ q.deposit|floatformat:"0g" }}</p>
+  </div>
+  <form method="post" class="panel stack">
+    {% csrf_token %}
+    <input type="hidden" name="start" value="{{ start|date:'Y-m-d' }}">
+    <input type="hidden" name="end" value="{{ end|date:'Y-m-d' }}">
+    <input type="hidden" name="driver" value="{{ driver|yesno:'1,0' }}">
+    <input name="name" placeholder="Full name" required>
+    <input name="phone" placeholder="Phone e.g. 0712345678" required>
+    <button class="btn" type="submit">Continue to M-Pesa payment</button>
+  </form>
+</main>
+{% endblock %}

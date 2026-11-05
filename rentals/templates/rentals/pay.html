@@ -1,0 +1,68 @@
+{% extends "rentals/base.html" %}
+{% block title %}Pay {{ b.ref }}{% endblock %}
+{% block content %}
+<main class="narrow">
+  <h2>Booking {{ b.ref }}</h2>
+  <div class="panel">
+    <p><b>{{ b.car.name }}</b><br>{{ b.start_date }} → {{ b.end_date }} ({{ b.days }} days)<br>
+    {{ b.customer_name }} · {{ b.phone }}</p>
+    <p class="price">Total: KES {{ b.total|floatformat:"0g" }}</p>
+    <p>Status: <span class="tag status-{{ b.status }}">{{ b.get_status_display }}</span></p>
+  </div>
+
+  {% if b.status == "pending" or b.status == "verifying" %}
+  <div class="panel">
+    {% if STK_ENABLED and b.status == "pending" %}
+    <h3>Pay instantly with M-Pesa</h3>
+    <form method="post" action="{% url 'stk' b.ref %}" class="stack">
+      {% csrf_token %}
+      <select name="amount">
+        <option value="deposit">Deposit – KES {{ b.deposit|floatformat:"0g" }}</option>
+        <option value="full">Full – KES {{ b.total|floatformat:"0g" }}</option>
+      </select>
+      <button class="btn" type="submit">Send M-Pesa prompt to {{ b.phone }}</button>
+    </form>
+    <p class="muted">Or pay manually:</p>
+    {% endif %}
+    <h3>Pay with M-Pesa – Send Money</h3>
+    <ol>
+      <li>Open M-Pesa → <b>Send Money</b></li>
+      <li>Number: <b class="big">{{ MPESA_NUMBER }}</b></li>
+      <li>Amount: <b>KES {{ b.deposit|floatformat:"0g" }}</b> (deposit) or <b>KES {{ b.total|floatformat:"0g" }}</b> (full)</li>
+      <li>Enter your PIN, send, then paste the confirmation code below.</li>
+    </ol>
+    <form method="post" class="stack">
+      {% csrf_token %}
+      <input name="mpesa_code" placeholder="M-Pesa code e.g. SKL2ABC123" value="{{ b.mpesa_code }}" maxlength="10" style="text-transform:uppercase" required>
+      <button class="btn" type="submit">{% if b.status == "verifying" %}Update code{% else %}I have paid – confirm{% endif %}</button>
+    </form>
+    {% if b.status == "verifying" %}<div class="verify-note">Code <b>{{ b.mpesa_code }}</b> received. We are checking it against our M-Pesa records. <b>Your booking is only confirmed once we verify the payment.</b> This page updates by itself.</div>{% endif %}
+  </div>
+  {% elif b.status == "confirmed" %}
+  <div class="thanks">
+    <div class="check">&#10003;</div>
+    <h2>Thank you, {{ b.customer_name|truncatewords:1 }}!</h2>
+    <p>Your payment is verified and your <b>{{ b.car.name }}</b> is reserved for <b>{{ b.start_date|date:"j M" }} &ndash; {{ b.end_date|date:"j M Y" }}</b>.</p>
+    <p>Thank you for choosing us. Karibu sana, and safe travels on the road ahead!</p>
+    <p class="muted" style="color:#d6e8dc">Booking {{ b.ref }} &middot; Bring your licence and ID at pick-up.</p>
+  </div>
+  {% else %}
+  <div class="msg error">This booking was cancelled.</div>
+  {% endif %}
+
+  <p class="stack">
+    <a class="btn alt" href="tel:{{ BUSINESS_PHONE }}">Call to enquire</a>
+    <a class="btn alt" href="https://wa.me/{{ WHATSAPP_NUMBER }}?text={{ wa_text }}">WhatsApp us</a>
+  </p>
+  <p class="muted">Save this link to check your booking status later.</p>
+</main>
+{% if b.status == "pending" or b.status == "verifying" %}
+<script>
+setInterval(function(){
+  fetch("{% url 'pay_status' b.ref %}").then(r=>r.json()).then(function(d){
+    if(d.status !== "{{ b.status }}") location.reload();
+  }).catch(function(){});
+}, 10000);
+</script>
+{% endif %}
+{% endblock %}
