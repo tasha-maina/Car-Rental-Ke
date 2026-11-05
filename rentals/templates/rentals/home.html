@@ -1,0 +1,62 @@
+{% extends "rentals/base.html" %}
+{% block back %}{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Rent a car anywhere in Kenya</h1>
+  <p>From Nissan Note to Range Rover. Pick dates, choose your car, pay by M-Pesa.</p>
+  <form class="search" method="get" id="searchForm">
+    <label>Pick-up <input type="date" onchange="this.form.submit()" name="start" value="{{ start|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}"></label>
+    <label>Return <input type="date" onchange="this.form.submit()" name="end" value="{{ end|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}"></label>
+    <label>Category
+      <select name="category" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for v, l in categories %}<option value="{{ v }}" {% if v == category %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Driver
+      <select name="driver" onchange="this.form.submit()">
+        <option value="0">Self-drive</option>
+        <option value="1" {% if driver %}selected{% endif %}>With driver (+KES {{ DRIVER_FEE }}/day)</option>
+      </select>
+    </label>
+    <button class="btn small" type="submit">Search</button>
+  </form>
+</section>
+<main>
+  <h2>Cars {% if valid %}<small>{{ start }} → {{ end }}</small>{% else %}<small>Choose valid dates</small>{% endif %}</h2>
+  <div class="grid">
+  {% for r in rows %}
+    <div class="card {% if not r.available %}unavail{% endif %}">
+      <div class="pic">{% if r.car.photo %}<img src="{{ r.car.photo.url }}" alt="{{ r.car.name }}" loading="lazy">{% else %}<span class="emo">{{ r.car.emoji }}</span>{% endif %}</div>
+      <div class="body">
+        <span class="tag">{{ r.car.get_category_display }}</span>
+        <h3>{{ r.car.name }}</h3>
+        <div class="specs">{{ r.car.seats }} seats · {{ r.car.transmission }} · {{ r.car.fuel }}{% if r.car.driver_only %} · Chauffeur only{% endif %}</div>
+        {% if r.quote %}
+          <div class="price">KES {{ r.quote.per_day|floatformat:"0g" }}<small>per day{% if r.quote.with_driver %} incl. driver{% endif %}{% if r.quote.discount %} ({{ r.quote.discount }}% off){% endif %}</small></div>
+          <div class="specs">Total: <b>KES {{ r.quote.total|floatformat:"0g" }}</b> for {{ r.quote.days }} day{{ r.quote.days|pluralize }}</div>
+        {% else %}
+          <div class="price">KES {{ r.car.daily_rate|floatformat:"0g" }}<small>per day</small></div>
+        {% endif %}
+        <div class="specs">{% if r.available %}✅ Available ({{ r.left }} left){% else %}❌ Not available{% endif %}</div>
+        {% if r.available %}
+          <a class="btn" href="{% url 'book' r.car.id %}?start={{ start|date:'Y-m-d' }}&end={{ end|date:'Y-m-d' }}&driver={{ driver|yesno:'1,0' }}">Book now</a>
+        {% else %}<span class="btn disabled">Unavailable</span>{% endif %}
+      </div>
+    </div>
+  {% empty %}<p>No cars found.</p>{% endfor %}
+  </div>
+  <section class="terms">
+    <h2>Before you drive</h2>
+    <p class="muted">Simple, transparent terms. No surprises at pick-up.</p>
+    <div class="term-grid">
+      <div class="term"><span class="n">01</span><h4>Mileage</h4><p>200 km a day included on self-drive. Extra distance is KES {{ EXTRA_KM_RATE }}/km. Weekly and monthly hires get unlimited mileage.</p></div>
+      <div class="term"><span class="n">02</span><h4>Driver</h4><p>Add a professional driver for KES {{ DRIVER_FEE }} a day. Luxury cars always come with a chauffeur.</p></div>
+      <div class="term"><span class="n">03</span><h4>Long-stay savings</h4><p>Book 7+ days and save 10%. Book 28+ days and save 20%, applied automatically.</p></div>
+      <div class="term"><span class="n">04</span><h4>Secure your car</h4><p>Pay a {{ DEPOSIT_PERCENT }}% deposit by M-Pesa to reserve it. Pay the balance when you collect.</p></div>
+      <div class="term"><span class="n">05</span><h4>Documents</h4><p>Bring a valid driving licence and your national ID or passport.</p></div>
+      <div class="term"><span class="n">06</span><h4>Fuel</h4><p>You get a full tank. Please return it just as full.</p></div>
+    </div>
+  </section>
+</main>
+{% endblock %}
