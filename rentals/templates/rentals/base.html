@@ -1,0 +1,26 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Car Rental KE{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'rentals/style.css' %}">
+</head>
+<body>
+<header>
+  <a class="logo" href="{% url 'home' %}">Car Rental <span>KE</span></a>
+  <nav>
+    <a href="{% url 'contact' %}">Enquiries</a>
+    <a class="call" href="tel:{{ BUSINESS_PHONE }}">📞 {{ BUSINESS_PHONE }}</a>
+  </nav>
+</header>
+{% if messages %}<div class="msgs">{% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}</div>{% endif %}
+{% block back %}<div class="backbar"><a href="{% url 'home' %}" onclick="if(history.length>1){history.back();return false}">&larr; Back</a><a class="homebtn" href="{% url 'home' %}">Return to home page</a></div>{% endblock %}
+{% block content %}{% endblock %}
+<footer>
+  <p>Enquiries: <a href="tel:{{ BUSINESS_PHONE }}">{{ BUSINESS_PHONE }}</a> ·
+  <a href="https://wa.me/{{ WHATSAPP_NUMBER }}">WhatsApp</a> · Pay via M-Pesa Send Money {{ MPESA_NUMBER }}</p>
+  <p class="copy">&copy; {% now 'Y' %} Car Rental KE. All rights reserved.</p>
+</footer>
+</body>
+</html>
